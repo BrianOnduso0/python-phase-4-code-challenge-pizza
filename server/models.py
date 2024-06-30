@@ -21,6 +21,7 @@ class Restaurant(db.Model, SerializerMixin):
     address = db.Column(db.String)
 
     # add relationship
+    pizzas = db.relationship('RestaurantPizza', back_populates='restaurant', cascade='all, delete-orphan')
 
     # add serialization rules
 
@@ -36,7 +37,8 @@ class Pizza(db.Model, SerializerMixin):
     ingredients = db.Column(db.String)
 
     # add relationship
-
+    restaurants = db.relationship('RestaurantPizza', back_populates='pizza', cascade='all, delete-orphan')
+   
     # add serialization rules
 
     def __repr__(self):
@@ -52,6 +54,18 @@ class RestaurantPizza(db.Model, SerializerMixin):
     # add relationships
 
     # add serialization rules
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id', ondelete='CASCADE'), nullable=False)
+    pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id', ondelete='CASCADE'), nullable=False)
+
+    # Define relationships
+    restaurant = db.relationship('Restaurant', back_populates='pizzas')
+    pizza = db.relationship('Pizza', back_populates='restaurants')
+
+    # Validation for price
+    @validates('price')
+    def validate_price(self, key, price):
+        assert 1.0 <= price <= 30.0, "Price must be between 1 and 30"
+        return price
 
     # add validation
 
